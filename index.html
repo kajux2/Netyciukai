@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Netyciuku Casino</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a0033, #4d0099);
+            min-height: 100vh;
+            color: #fff;
+            position: relative;
+        }
+
+        .casino {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+            color: #ffd700;
+            text-shadow: 0 0 10px #ffd700;
+        }
+
+        .user-info {
+            font-size: 1.2em;
+        }
+
+        #accountName {
+            font-size: 1.2em;
+            color: #00ff99;
+            text-shadow: 0 0 5px #00ff99;
+        }
+
+        #gameMenu {
+            background: #00ff99;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .menu {
+            position: absolute;
+            top: 100%;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+            transform: scaleY(0);
+            transform-origin: top;
+            transition: transform 0.3s ease;
+            z-index: 15;
+        }
+
+        .menu.open {
+            display: block;
+            transform: scaleY(1);
+        }
+
+        .menu button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: linear-gradient(45deg, #ffd700, #ffeb66);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #000;
+            text-shadow: 0 0 5px #ffd700;
+            transition: transform 0.2s;
+        }
+
+        .menu button:hover {
+            transform: scale(1.05);
+        }
+
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+
+        .auth-form {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .auth-form h2 {
+            color: #ffd700;
+            text-align: center;
+        }
+
+        .auth-form input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ffd700;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .auth-form button {
+            width: 100%;
+            padding: 10px;
+            background: #ffd700;
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            cursor: pointer;
+        }
+
+        .auth-form span {
+            color: #00ff99;
+            cursor: pointer;
+        }
+
+        .auth-form .error {
+            color: #ff4d4d;
+            font-size: 0.9em;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        .games-container {
+            margin-top: 20px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .game {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .roulette-board {
+            background: #002200;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .roulette-wrapper {
+            position: relative;
+            height: 80px;
+        }
+
+        .roulette-tiles {
+            display: flex;
+            transition: transform 4s ease-out;
+        }
+
+        .roulette-tiles div {
+            width: 60px;
+            height: 60px;
+            line-height: 60px;
+            text-align: center;
+            font-size: 1.2em;
+            margin: 5px;
+            border-radius: 5px;
+            color: #fff;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+            flex-shrink: 0;
+        }
+
+        .roulette-tiles .red {
+            background: linear-gradient(45deg, #ff3333, #ff6666);
+            text-shadow: 0 0 5px #ff0000;
+        }
+
+        .roulette-tiles .black {
+            background: linear-gradient(45deg, #1a1a1a, #4d4d4d);
+            text-shadow: 0 0 5px #000000;
+        }
+
+        .roulette-tiles .gold {
+            background: linear-gradient(45deg, #ffcc00, #ffeb66);
+            text-shadow: 0 0 5px #ffd700;
+        }
+
+        .win-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: #ffd700;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px #ffd700;
+            z-index: 1;
+        }
+
+        .winning-tile {
+            animation: glow 1s infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px #ffd700; }
+            to { box-shadow: 0 0 20px #ffd700, 0 0 30px #ff00ff; }
+        }
+
+        .bet-controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .bet-controls input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ffd700;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .bet-controls button {
+            padding: 10px 20px;
+            background: #00ff99;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #betMenuBtn {
+            background: linear-gradient(45deg, #ff00ff, #ff66ff);
+            color: #fff;
+        }
+
+        .bet-menu {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) scaleY(0);
+            transform-origin: top;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+            transition: transform 0.3s ease;
+            z-index: 20;
+        }
+
+        .bet-menu.open {
+            display: block;
+            transform: translateX(-50%) scaleY(1);
+        }
+
+        .bet-menu button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: linear-gradient(45deg, #ffd700, #ffeb66);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #000;
+            text-shadow: 0 0 5px #ffd700;
+            transition: transform 0.2s;
+        }
+
+        .bet-menu button:hover {
+            transform: scale(1.05);
+        }
+
+        #selectedBet {
+            font-size: 1.1em;
+            color: #ffd700;
+            text-shadow: 0 0 5px #ffd700;
+        }
+
+        .mines-board {
+            background: #002200;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .mines-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            justify-content: center;
+            align-content: center;
+            width: 340px;
+            margin: 0 auto;
+        }
+
+        .mines-grid div {
+            width: 60px;
+            height: 60px;
+            background: #333;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .mines-grid div.revealed {
+            background: #666;
+        }
+
+        .mines-grid div.mine {
+            background: #ff4d4d;
+            color: #fff;
+        }
+
+        .mines-grid div.safe {
+            background: #00ff99;
+            color: #fff;
+        }
+
+        #minesMultiplier {
+            font-size: 1.1em;
+            color: #ffd700;
+        }
+
+        .logout {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #ff4d4d;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #adminPanel {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #adminPanel h2 {
+            color: #ffd700;
+            text-shadow: 0 0 10px #ffd700;
+        }
+
+        #userList {
+            margin: 10px 0;
+        }
+
+        #userList div {
+            padding: 5px;
+            border-bottom: 1px solid #ffd700;
+        }
+
+        #notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #ffd700;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px #ffd700;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        #notification.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="notification"></div>
+    <div class="casino">
+        <header>
+            <div id="accountName"></div>
+            <h1>Netyciuku Casino</h1>
+            <div class="user-info">Balance: $<span id="balance">0</span></div>
+            <button id="gameMenu">Games</button>
+            <div id="menu" class="menu">
+                <button onclick="switchGame('roulette')">Roulette</button>
+                <button onclick="switchGame('mines')">Mines</button>
+            </div>
+        </header>
+
+        <div id="auth" class="auth-container">
+            <div id="loginForm" class="auth-form">
+                <h2>Login</h2>
+                <input type="text" id="loginUser" placeholder="Username">
+                <input type="password" id="loginPass" placeholder="Password">
+                <button onclick="login()">Login</button>
+                <p>Not a member? <span onclick="toggleAuth()">Sign Up</span></p>
+            </div>
+            <div id="signupForm" class="auth-form" style="display: none;">
+                <h2>Sign Up</h2>
+                <input type="text" id="signupUser" placeholder="Username">
+                <input type="password" id="signupPass" placeholder="Password">
+                <button onclick="signup()">Sign Up</button>
+                <p>Already joined? <span onclick="toggleAuth()">Login</span></p>
+            </div>
+        </div>
+
+        <div id="games" class="games-container" style="display: none;">
+            <div id="roulette" class="game" style="display: none;">
+                <div class="roulette-board">
+                    <div class="roulette-wrapper">
+                        <div id="rouletteWheel" class="roulette-tiles"></div>
+                        <div id="winLine" class="win-line"></div>
+                    </div>
+                </div>
+                <div class="bet-controls">
+                    <input type="number" id="rouletteBet" min="1" placeholder="Bet Amount">
+                    <button id="betMenuBtn">Bet Options</button>
+                    <div id="betMenu" class="bet-menu">
+                        <button onclick="selectBet('red')">Red</button>
+                        <button onclick="selectBet('black')">Black</button>
+                        <button onclick="selectBet('number')">Number</button>
+                        <button onclick="selectBet('gold')">Gold Bar (🎰)</button>
+                    </div>
+                    <span id="selectedBet">Selected: Red</span>
+                    <input type="number" id="rouletteNumber" min="0" max="36" style="display: none;" placeholder="Pick 0-36">
+                    <button id="spinBtn" onclick="playRoulette()">Spin</button>
+                </div>
+            </div>
+            <div id="mines" class="game" style="display: none;">
+                <div class="mines-board">
+                    <div id="minesGrid" class="mines-grid"></div>
+                </div>
+                <div class="bet-controls">
+                    <input type="number" id="minesBet" min="1" placeholder="Bet Amount">
+                    <input type="number" id="minesCount" min="1" max="24" placeholder="Mines (1-24)">
+                    <button id="startMinesBtn" onclick="startMines()">Start</button>
+                    <button id="cashout" onclick="cashoutMines()" style="display: none;">Cash Out</button>
+                    <div id="minesMultiplier">Multiplier: 1.00x</div>
+                </div>
+            </div>
+            <button onclick="logout()" class="logout">Logout</button>
+        </div>
+
+        <div id="adminPanel">
+            <h2>Admin Panel</h2>
+            <div id="userList"></div>
+            <input type="text" id="adminUsername" placeholder="Username">
+            <input type="number" id="adminAmount" min="1" placeholder="Amount to Add">
+            <button onclick="topUpBalance()">Top Up</button>
+        </div>
+    </div>
+    <script>
+        let currentUser = null;
+        let currentGame = 'roulette';
+        let minesState = null;
+        let selectedBet = 'red';
+        let isSpinning = false;
+        let users = {};
+
+        const rouletteNumbers = [
+            0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36,
+            11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9,
+            22, 18, 29, 7, 28, 12, 35, 3, 26
+        ];
+        const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+
+        async function updateUI() {
+            document.getElementById('auth').style.display = currentUser ? 'none' : 'block';
+            const isAdmin = currentUser === 'admin';
+            document.getElementById('games').style.display = currentUser && !isAdmin ? 'block' : 'none';
+            document.getElementById('adminPanel').style.display = isAdmin ? 'block' : 'none';
+            if (currentUser) {
+                try {
+                    const response = await fetch('/.netlify/functions/getUser', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: currentUser })
+                    });
+                    const userData = await response.json();
+                    if (response.ok) {
+                        users[currentUser] = { password: users[currentUser]?.password || '', balance: userData.balance, id: userData.id };
+                        document.getElementById('balance').textContent = users[currentUser].balance;
+                        document.getElementById('accountName').textContent = currentUser;
+                    } else {
+                        console.error('Failed to fetch user data:', userData.error);
+                        showNotification('Error loading user data. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error in updateUI:', error);
+                    showNotification('Network error. Check your connection.');
+                }
+                if (!isAdmin) {
+                    document.getElementById('roulette').style.display = currentGame === 'roulette' ? 'block' : 'none';
+                    document.getElementById('mines').style.display = currentGame === 'mines' ? 'block' : 'none';
+                    if (currentGame === 'roulette') populateRoulette();
+                    document.getElementById('startMinesBtn').disabled = minesState && !minesState.gameOver;
+                } else {
+                    updateAdminPanel();
+                }
+            } else {
+                document.getElementById('accountName').textContent = '';
+                document.getElementById('balance').textContent = '0';
+            }
+        }
+
+        function showError(formId, message) {
+            let error = document.getElementById(`${formId}Error`);
+            if (!error) {
+                error = document.createElement('div');
+                error.id = `${formId}Error`;
+                error.className = 'error';
+                document.getElementById(formId).appendChild(error);
+            }
+            error.textContent = message;
+        }
+
+        function clearErrors() {
+            const errors = document.querySelectorAll('.error');
+            errors.forEach(error => error.remove());
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        async function signup() {
+            clearErrors();
+            const username = document.getElementById('signupUser').value.trim();
+            const password = document.getElementById('signupPass').value.trim();
+            if (!username || !password) {
+                showError('signupForm', 'Please fill in all fields.');
+                return;
+            }
+            try {
+                const response = await fetch('/.netlify/functions/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    showError('signupForm', result.error || 'Username already taken.');
+                    console.error('Signup failed:', result.error);
+                    return;
+                }
+                users[username] = { password, balance: result.balance, id: result.id };
+                currentUser = username;
+                localStorage.setItem('currentUser', currentUser);
+                await updateUI();
+                console.log('Signup successful:', result);
+            } catch (error) {
+                console.error('Signup error:', error);
+                showError('signupForm', 'Signup failed. Check network or console.');
+            }
+        }
+
+        async function login() {
+            clearErrors();
+            const username = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPass').value.trim();
+            if (!username || !password) {
+                showError('loginForm', 'Please fill in all fields.');
+                return;
+            }
+            try {
+                const response = await fetch('/.netlify/functions/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    showError('loginForm', result.error || 'Invalid credentials.');
+                    console.error('Login failed:', result.error);
+                    return;
+                }
+                users[username] = { password, balance: result.balance, id: result.id };
+                currentUser = username;
+                localStorage.setItem('currentUser', currentUser);
+                await updateUI();
+                console.log('Login successful:', result);
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('loginForm', 'Login failed. Check network or console.');
+            }
+        }
+
+        function toggleAuth() {
+            clearErrors();
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            loginForm.style.display = loginForm.style.display === 'none' ? 'block' : 'none';
+            signupForm.style.display = signupForm.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function logout() {
+            currentUser = null;
+            minesState = null;
+            isSpinning = false;
+            localStorage.removeItem('currentUser');
+            updateUI();
+        }
+
+        function switchGame(game) {
+            currentGame = game;
+            minesState = null;
+            isSpinning = false;
+            document.getElementById('menu').classList.remove('open');
+            updateUI();
+        }
+
+        document.getElementById('gameMenu').addEventListener('click', () => {
+            const menu = document.getElementById('menu');
+            menu.classList.toggle('open');
+        });
+
+        function populateRoulette() {
+            const wheel = document.getElementById('rouletteWheel');
+            wheel.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                rouletteNumbers.forEach(num => {
+                    const tile = document.createElement('div');
+                    tile.textContent = num === 0 ? '🎰' : num;
+                    tile.className = num === 0 ? 'gold' : redNumbers.includes(num) ? 'red' : 'black';
+                    wheel.appendChild(tile);
+                });
+            }
+        }
+
+        function selectBet(type) {
+            selectedBet = type;
+            document.getElementById('rouletteNumber').style.display = type === 'number' ? 'inline' : 'none';
+            document.getElementById('selectedBet').textContent = `Selected: ${type === 'gold' ? 'Gold Bar (🎰)' : type.charAt(0).toUpperCase() + type.slice(1)}`;
+            document.getElementById('betMenu').classList.remove('open');
+        }
+
+        document.getElementById('betMenuBtn').addEventListener('click', () => {
+            const betMenu = document.getElementById('betMenu');
+            betMenu.classList.toggle('open');
+        });
+
+        async function playRoulette() {
+            if (isSpinning) return;
+
+            const bet = parseInt(document.getElementById('rouletteBet').value);
+            const number = parseInt(document.getElementById('rouletteNumber').value);
+            if (!bet || bet <= 0 || bet > users[currentUser].balance) {
+                showNotification('Invalid bet amount. Must be a positive number and less than or equal to your balance.');
+                return;
+            }
+            if (selectedBet === 'number' && (isNaN(number) || number < 0 || number > 36)) {
+                showNotification('Please select a valid number (0-36)');
+                return;
+            }
+
+            const wheel = document.getElementById('rouletteWheel');
+            const spinButton = document.getElementById('spinBtn');
+            spinButton.disabled = true;
+            isSpinning = true;
+
+            users[currentUser].balance -= bet;
+            const resultIndex = Math.floor(Math.random() * rouletteNumbers.length);
+            const tileWidth = 70;
+            const centerOffset = Math.floor(document.querySelector('.roulette-wrapper').clientWidth / 2);
+            const tileOffset = (rouletteNumbers.length * 2 + resultIndex) * tileWidth + tileWidth / 2;
+            const offset = centerOffset - tileOffset;
+
+            wheel.style.transform = `translateX(${offset}px)`;
+            await new Promise(resolve => setTimeout(resolve, 4000));
+
+            const result = rouletteNumbers[resultIndex];
+            let winnings = 0;
+            if (selectedBet === 'number' && result === number) winnings = bet * 36;
+            else if (selectedBet === 'red' && redNumbers.includes(result)) winnings = bet * 2;
+            else if (selectedBet === 'black' && result !== 0 && !redNumbers.includes(result)) winnings = bet * 2;
+            else if (selectedBet === 'gold' && result === 0) winnings = bet * 14;
+
+            if (winnings > 0) {
+                users[currentUser].balance += winnings;
+                const winningTile = wheel.children[rouletteNumbers.length * 2 + resultIndex];
+                winningTile.classList.add('winning-tile');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                winningTile.classList.remove('winning-tile');
+            }
+
+            try {
+                await fetch('/.netlify/functions/updateBalance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser, balance: users[currentUser].balance })
+                });
+            } catch (error) {
+                console.error('Error updating balance:', error);
+                showNotification('Failed to update balance.');
+            }
+            updateUI();
+            showNotification(`Result: ${result === 0 ? '🎰' : result} - ${winnings ? `Won: $${winnings}` : 'Lost'}`);
+
+            wheel.style.transition = 'none';
+            wheel.style.transform = 'translateX(0)';
+            void wheel.offsetWidth;
+            wheel.style.transition = 'transform 4s ease-out';
+            spinButton.disabled = false;
+            isSpinning = false;
+        }
+
+        async function startMines() {
+            if (minesState && !minesState.gameOver) {
+                showNotification('Finish your current game first!');
+                return;
+            }
+
+            const bet = parseInt(document.getElementById('minesBet').value);
+            const mineCount = parseInt(document.getElementById('minesCount').value);
+            if (!bet || bet <= 0 || bet > users[currentUser].balance) {
+                showNotification('Invalid bet amount. Must be a positive number and less than or equal to your balance.');
+                return;
+            }
+            if (!mineCount || mineCount < 1 || mineCount > 24) {
+                showNotification('Invalid mine count (1-24)');
+                return;
+            }
+
+            users[currentUser].balance -= bet;
+            try {
+                await fetch('/.netlify/functions/updateBalance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser, balance: users[currentUser].balance })
+                });
+            } catch (error) {
+                console.error('Error updating balance:', error);
+                showNotification('Failed to update balance.');
+            }
+
+            const grid = document.getElementById('minesGrid');
+            grid.innerHTML = '';
+            minesState = {
+                bet,
+                mines: mineCount,
+                revealed: 0,
+                multiplier: 1,
+                tiles: Array(25).fill(false),
+                gameOver: false
+            };
+
+            let minesPlaced = 0;
+            while (minesPlaced < mineCount) {
+                const pos = Math.floor(Math.random() * 25);
+                if (!minesState.tiles[pos]) {
+                    minesState.tiles[pos] = true;
+                    minesPlaced++;
+                }
+            }
+
+            for (let i = 0; i < 25; i++) {
+                const tile = document.createElement('div');
+                tile.addEventListener('click', () => revealTile(i));
+                grid.appendChild(tile);
+            }
+
+            document.getElementById('cashout').style.display = 'block';
+            document.getElementById('minesMultiplier').textContent = 'Multiplier: 1.00x';
+            updateUI();
+        }
+
+        async function revealTile(index) {
+            if (!minesState || minesState.gameOver || minesState.tiles[index] === null) return;
+
+            const tile = document.getElementById('minesGrid').children[index];
+            tile.classList.add('revealed');
+
+            if (minesState.tiles[index]) {
+                tile.classList.add('mine');
+                tile.textContent = '💣';
+                minesState.gameOver = true;
+                revealAllMines();
+                showNotification('Game Over! You hit a mine.');
+                document.getElementById('cashout').style.display = 'none';
+            } else {
+                tile.classList.add('safe');
+                tile.textContent = '💎';
+                minesState.revealed++;
+                minesState.tiles[index] = null;
+                minesState.multiplier = 1 + (minesState.revealed * (minesState.mines / 25));
+                document.getElementById('minesMultiplier').textContent = `Multiplier: ${minesState.multiplier.toFixed(2)}x`;
+            }
+            updateUI();
+        }
+
+        function revealAllMines() {
+            const grid = document.getElementById('minesGrid');
+            grid.innerHTML = '';
+            minesState.tiles.forEach((isMine, i) => {
+                const tile = document.createElement('div');
+                if (isMine) {
+                    tile.classList.add('mine', 'revealed');
+                    tile.textContent = '💣';
+                } else if (minesState.tiles[i] === null) {
+                    tile.classList.add('safe', 'revealed');
+                    tile.textContent = '💎';
+                } else {
+                    tile.classList.add('revealed');
+                }
+                grid.appendChild(tile);
+            });
+        }
+
+        async function cashoutMines() {
+            if (!minesState || minesState.gameOver) return;
+
+            const winnings = Math.floor(minesState.bet * minesState.multiplier);
+            users[currentUser].balance += winnings;
+            try {
+                await fetch('/.netlify/functions/updateBalance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser, balance: users[currentUser].balance })
+                });
+            } catch (error) {
+                console.error('Error updating balance:', error);
+                showNotification('Failed to update balance.');
+            }
+            minesState.gameOver = true;
+            revealAllMines();
+            showNotification(`Cashed out! Won: $${winnings}`);
+            document.getElementById('cashout').style.display = 'none';
+            updateUI();
+        }
+
+        async function updateAdminPanel() {
+            try {
+                const response = await fetch('/.netlify/functions/getUsers', {
+                    method: 'GET'
+                });
+                if (!response.ok) {
+                    console.error('Failed to fetch users:', response.statusText);
+                    showNotification('Error loading admin panel.');
+                    return;
+                }
+                const allUsers = await response.json();
+                const userList = document.getElementById('userList');
+                userList.innerHTML = '';
+                allUsers.forEach(user => {
+                    const div = document.createElement('div');
+                    div.textContent = `${user.username}: $${user.balance}`;
+                    userList.appendChild(div);
+                    users[user.username] = { password: user.password || '', balance: user.balance, id: user.id };
+                });
+            } catch (error) {
+                console.error('Error in updateAdminPanel:', error);
+                showNotification('Failed to load admin panel.');
+            }
+        }
+
+        async function topUpBalance() {
+            const username = document.getElementById('adminUsername').value.trim();
+            const amount = parseInt(document.getElementById('adminAmount').value);
+            if (!username || !users[username]) {
+                showNotification('Invalid username.');
+                return;
+            }
+            if (!amount || amount <= 0) {
+                showNotification('Please enter a valid positive amount.');
+                return;
+            }
+            users[username].balance += amount;
+            try {
+                const response = await fetch('/.netlify/functions/updateBalance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, balance: users[username].balance })
+                });
+                if (!response.ok) {
+                    console.error('Failed to update balance:', response.statusText);
+                    showNotification('Error updating balance.');
+                    return;
+                }
+                updateAdminPanel();
+                showNotification(`Added $${amount} to ${username}'s balance.`);
+            } catch (error) {
+                console.error('Error in topUpBalance:', error);
+                showNotification('Failed to update balance.');
+            }
+        }
+
+        window.addEventListener('load', async () => {
+            currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                await updateUI();
+            } else {
+                // Ensure admin exists on first load
+                try {
+                    const response = await fetch('/.netlify/functions/signup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: 'admin', password: 'admin123' })
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        users.admin = { password: 'admin123', balance: data.balance || 1000, id: data.id };
+                        console.log('Admin created:', data);
+                    } else if (data.error.includes('duplicate')) {
+                        console.log('Admin already exists');
+                    } else {
+                        console.error('Admin signup failed:', data.error);
+                    }
+                } catch (error) {
+                    console.error('Error creating admin:', error);
+                }
+                updateUI();
+            }
+        });
+    </script>
+</body>
+</html>
